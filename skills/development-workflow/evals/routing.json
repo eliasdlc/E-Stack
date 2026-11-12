@@ -1,0 +1,78 @@
+{
+  "about": "Expected routing for development-workflow. tests/test_external_practices.py checks that this file is well formed; it does not run a model.",
+  "skill": "development-workflow",
+  "cases": [
+    {
+      "id": "full-send",
+      "message": "full send this one, it is a copy fix on the waitlist page",
+      "situation": "A small trusted change.",
+      "expect": {
+        "loads": true
+      },
+      "check": "the full-send text arrives from the hook and the agent calls development-workflow; the PR is watched and merged on the criteria, then the release is followed"
+    },
+    {
+      "id": "full-stop",
+      "message": "arregla el bug del mapa y full stop, no lo mergees",
+      "situation": "A risky native change.",
+      "expect": {
+        "loads": true
+      },
+      "check": "the full-stop text arrives from the hook and the agent calls development-workflow; the PR ends with one ready message, a one-step test first and no merge, even a task PR into dev that meets the criteria"
+    },
+    {
+      "id": "merge",
+      "message": "merge PR 209 if everything is green",
+      "situation": "Merge request.",
+      "expect": {
+        "loads": true
+      },
+      "check": "development-workflow loads and reads the merge criteria"
+    },
+    {
+      "id": "implement",
+      "message": "implement the onboarding progress bar from the ticket",
+      "situation": "Implementation.",
+      "expect": {
+        "loads": true
+      },
+      "check": "development-workflow loads before editing"
+    },
+    {
+      "id": "needs-eye",
+      "message": "full send the Firestore rules change",
+      "situation": "On the needs-my-eye list.",
+      "expect": {
+        "loads": true
+      },
+      "check": "the full-send text arrives from the hook; the PR is on the needs-my-eye list, so it ends as a full stop and says so in its first line"
+    },
+    {
+      "id": "question",
+      "message": "what does full send mean in Theo's workflow?",
+      "situation": "A question.",
+      "expect": {
+        "loads": false
+      },
+      "check": "An answer; no PR work"
+    },
+    {
+      "id": "read-only",
+      "message": "audit the backend writes of conocerd-api, do not change anything",
+      "situation": "Read-only audit.",
+      "expect": {
+        "loads": false
+      },
+      "check": "backend-logic-auditor or an answer; no lifecycle"
+    },
+    {
+      "id": "stop-word",
+      "message": "stop, que estas haciendo?",
+      "situation": "A stop request with no mode.",
+      "expect": {
+        "loads": false
+      },
+      "check": "The agent stops and answers; development-workflow does not load"
+    }
+  ]
+}

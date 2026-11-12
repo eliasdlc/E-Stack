@@ -1,0 +1,96 @@
+{
+  "about": "Expected routing for handoff. tests/test_external_practices.py checks that this file is well formed; it does not run a model.",
+  "skill": "handoff",
+  "cases": [
+    {
+      "id": "slash",
+      "message": "/handoff",
+      "situation": "End of a session.",
+      "expect": {
+        "loads": true
+      },
+      "check": "handoff loads and re-runs the state commands"
+    },
+    {
+      "id": "spanish",
+      "message": "hazme el handoff para seguir esto en agentbox",
+      "situation": "Work moves to agentbox.",
+      "expect": {
+        "loads": true
+      },
+      "check": "handoff loads, pushes the branch first and names agentbox"
+    },
+    {
+      "id": "casual",
+      "message": "dame el handof pa otra sesion",
+      "situation": "Typo, new session.",
+      "expect": {
+        "loads": true
+      },
+      "check": "handoff loads"
+    },
+    {
+      "id": "new-thread",
+      "message": "write what a fresh thread needs to keep going with the Booga port",
+      "situation": "Never says handoff.",
+      "expect": {
+        "loads": true
+      },
+      "check": "handoff loads and fills the ledger template"
+    },
+    {
+      "id": "pause-context",
+      "message": "se nos esta llenando el contexto y no termino esto hoy, guardalo todo para retomarlo manana",
+      "situation": "A session must stop with the task branch half done; nobody continues it now.",
+      "expect": {
+        "loads": true
+      },
+      "check": "handoff loads, commits wip: on the task branch, pushes it and writes the pause note"
+    },
+    {
+      "id": "pause-move",
+      "message": "voy a apagar la computadora, pasa lo que esta corriendo a agentbox",
+      "situation": "Work continues now on the other machine.",
+      "expect": {
+        "loads": false
+      },
+      "check": "model-delegation launches the agentbox thread; no pause note is the whole answer"
+    },
+    {
+      "id": "pasted",
+      "message": "(pastes a handoff block) este es el handoff, hazlo",
+      "situation": "A handoff to execute.",
+      "expect": {
+        "loads": false
+      },
+      "check": "The handoff is executed; the skill does not write a new one"
+    },
+    {
+      "id": "summary",
+      "message": "resumeme lo que hicimos hoy",
+      "situation": "A summary request.",
+      "expect": {
+        "loads": false
+      },
+      "check": "A chat summary; handoff does not load"
+    },
+    {
+      "id": "phase-end",
+      "message": "termina la fase y dime que falta",
+      "situation": "End of phase.",
+      "expect": {
+        "loads": false
+      },
+      "check": "development-workflow handoff rules; no paste-ready block"
+    },
+    {
+      "id": "handoff-word",
+      "message": "como funciona el handoff entre el laptop y agentbox?",
+      "situation": "A question about the mechanism.",
+      "expect": {
+        "loads": false
+      },
+      "check": "An answer; no block is written"
+    }
+  ]
+}

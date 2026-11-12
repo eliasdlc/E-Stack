@@ -1,0 +1,83 @@
+{
+  "about": "Expected routing for social-presence. tests/test_external_practices.py checks that this file is well formed; it runs no model. The hand run described in the rules-and-skills skill is what shows routing, and its results table lives in the PR.",
+  "skill": "social-presence",
+  "cases": [
+    {
+      "id": "tweet-about-release-es",
+      "message": "hazme un tweet sobre lo que acabamos de mergear en kino, lo del calendario nuevo",
+      "situation": "Kino is a public repo with a merged calendar PR this week.",
+      "expect": {"loads": true},
+      "check": "A Skill call naming social-presence before any draft is written"
+    },
+    {
+      "id": "what-to-post-today",
+      "message": "What should I post today? I want to keep showing up on X this week without being annoying",
+      "situation": "Never names the skill or a platform feature.",
+      "expect": {"loads": true},
+      "check": "A Skill call naming social-presence; the answer is a menu of moves, not generic advice"
+    },
+    {
+      "id": "linkedin-launch-post",
+      "message": "Write a LinkedIn post announcing that ConoceRD is live on Google Play. Brauny and I built it in Santiago, I want people to download it and leave a review",
+      "situation": "Formal request for one LinkedIn post.",
+      "expect": {"loads": true},
+      "check": "A Skill call naming social-presence; the draft is ready to paste"
+    },
+    {
+      "id": "replies-typo",
+      "message": "dame respuestas para unos post de gente de flutter q estan hablando del nuevo release, quiero creser en x",
+      "situation": "Casual, dictated, with typos.",
+      "expect": {"loads": true},
+      "check": "A Skill call naming social-presence; replies come with the post they answer"
+    },
+    {
+      "id": "weekly-numbers",
+      "message": "Esta semana en X: 3,200 impresiones, 14 seguidores nuevos, 2 personas me escribieron por paginas web. Como vamos contra la meta?",
+      "situation": "He pastes his weekly numbers.",
+      "expect": {"loads": true},
+      "check": "A Skill call naming social-presence; the answer compares with the goals and changes the plan"
+    },
+    {
+      "id": "agent-system-thread",
+      "message": "I want to share on X how my setup works, two machines and the 46 skills, as a thread people actually read. Help me with it",
+      "situation": "visual-briefing also covers explaining how something works; this one is for a public post.",
+      "expect": {"loads": true},
+      "check": "A Skill call naming social-presence wins over visual-briefing; the output is thread text, not an HTML page"
+    },
+    {
+      "id": "figma-post-graphic",
+      "message": "Hazme en Figma los posts de los charlistas de Barcamp, formato 1080x1350, con la plantilla del año pasado",
+      "situation": "A graphic piece in Figma, owned by figma-assets.",
+      "expect": {"loads": false},
+      "check": "figma-assets loads; social-presence does not"
+    },
+    {
+      "id": "whatsapp-to-partner",
+      "message": "Escribele un WhatsApp a Brauny diciendole que el build de prueba ya esta y que lo instale hoy",
+      "situation": "A message to one person, not a public post.",
+      "expect": {"loads": false},
+      "check": "No Skill call naming social-presence"
+    },
+    {
+      "id": "og-tags-code",
+      "message": "Add Open Graph and Twitter card meta tags to decruce.dev so links show a preview when shared on X",
+      "situation": "Code change in a web repo that mentions X.",
+      "expect": {"loads": false},
+      "check": "development-workflow may load; social-presence does not"
+    },
+    {
+      "id": "release-notes",
+      "message": "Write the release notes for ConoceRD 0.18 so the testers know what to try",
+      "situation": "Release notes belong to development-workflow, not a public announcement.",
+      "expect": {"loads": false},
+      "check": "No Skill call naming social-presence"
+    },
+    {
+      "id": "x-api-question",
+      "message": "how does the twitter api rate limiting work in general, I'm reading about it for class",
+      "situation": "A general question that shares words with the skill.",
+      "expect": {"loads": false},
+      "check": "No Skill call naming social-presence; a plain answer"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+# Why rules/CLAUDE.md says what it says
+
+Read this only when changing a core rule; it is not needed to follow them.
+
+- 1 Nov 2026, PR 140: a parked PR gave no row and no reason, and "Apruebo todo" did not merge it because "waits for me to press merge" read as only his click counting. Hence the row and match in the park message.
+- 6 Nov 2026, decisions 1A and 2A: 9 of 26 stress messages followed a reply he did not understand. Sentence rules adapted from pstack unslop and poteto-mode "Writing the reply" (github.com/cursor/plugins, MIT).
+- 6 Oct to 5 Nov 2026, laptop: 92 percent of edits were Python heredocs, and 4,100 of 6,203 carried no check that the text was found. The `shell-edit` hook warns at the call.
+- 6 Nov 2026, barcamp project: "si en el proyecto de barcamp pregunto por los prs abiertos me deberia de decir los pr de barcamp y no todos los pr de todos los proyectos".
+- 6 Nov 2026, decision 1A (https://plan.decruce.dev/d/xwiwcw7pkpm1): the four closing lines closed 83 percent of 2,287 final replies, median 82 words (19.5 percent of what he reads), 60 percent of replies that used no tool, and "Needs you" said "nothing" in 20 percent.
+- 10 Nov 2026, decision 4A (collaborator voice, his pick): the Done / Decided alone / Open / Needs you block left `# Closing a turn`. 45 percent of 1,220 closings carried an empty or merge-only "Needs you" (66 percent on agentbox), up from 42 at the audit baseline, and neither the rule nor `turn-close` moved it. A closing is now a short paragraph, links first, and what needs him goes through the question tool so the T3 thread shows it is waiting (Theo's tstack, "Asking the user"). Evidence labels moved to the claims he acts on. `turn-close` gained one check, a closing that asks him in prose (a non-empty Needs you line or a last line ending in "?") with no question tool, in T3 threads he reads, and `agents scorecard` replaced the Needs you row with the share asked through the tool and the share of closings that bury a question. He said the stack must be "fun to work with, not monotonous, something you wanna keep working with"; Pocock: "the document gets shorter as it gets better" (6,869 to 6,705 bytes).
+- Scope fields: Package A, approved 8 Oct 2026, moved routine fields out of reader prose while retaining the gate. "Needs you" replaced "Next" because a next line invited announcements instead of execution (22 Sep 2026).
+
+Moved out of `SKILL.md` in the B3 cut (10 Nov 2026), where they were HTML comments that reach the model:
+
+- Routing evals: adapted from anthropics/skills skill-creator (the trigger eval set of should and should-not queries with near misses, three runs per query for a trigger rate, the 60/40 train and held-out split, choosing the description by the held-out score, and the observation that trivial requests never load a skill). Not taken: its advice to make descriptions "pushy" against undertriggering, because here every description is paid on every turn and the exclusions matter as much as the triggers; its eval viewer, benchmark and subagent baselines, which are too much ceremony for a repo of this size.
+- The ceremony: step 2 found a real defect the first time. `unmerged-branches.sh` printed its header with an empty list because `read` was discarding the last line.

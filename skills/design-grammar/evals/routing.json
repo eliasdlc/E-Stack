@@ -1,0 +1,105 @@
+{
+  "about": "Expected routing for design-grammar. Expectations for a human or model graded run over a transcript. tests/test_external_practices.py checks that this file is well formed; it does not run a model, so it proves nothing about whether an agent routes this way. A case counts as loading when a Skill call names design-grammar before any call that names figma-assets.",
+  "skill": "design-grammar",
+  "cases": [
+    {
+      "id": "flutter-build-screen",
+      "message": "build the trip detail screen for the ConoceRD Flutter app: a header with the cover photo, the itinerary list and a pill button to start the trip",
+      "situation": "Flutter app, a new screen asked from scratch with no file named, so the agent has nothing to open before it decides.",
+      "expect": {
+        "loads": true
+      },
+      "check": "A Skill call naming design-grammar comes before the first Write or Edit of the screen"
+    },
+    {
+      "id": "spanish-looks-ai",
+      "message": "se ve muy AI el hero de kino, arreglalo, los colores y el espaciado estan raros",
+      "situation": "Web product with a Next.js hero section, dictated in Spanish.",
+      "expect": {
+        "loads": true
+      },
+      "check": "design-grammar loads before any change to the hero; frontend-design may load next to it"
+    },
+    {
+      "id": "never-names-it",
+      "message": "in lib/ui/profile_screen.dart the accent is on every section title and the cards have a shadow in dark mode, something feels off, can you look",
+      "situation": "Flutter screen, the message describes the symptoms and no skill.",
+      "expect": {
+        "loads": true
+      },
+      "check": "design-grammar loads before the file is judged or edited"
+    },
+    {
+      "id": "web-redesign",
+      "message": "redesign the landing page of conocerd-web, it looks like every other Next.js template and I want it to feel made by someone",
+      "situation": "Web repo with a package.json and no DESIGN.md.",
+      "expect": {
+        "loads": true
+      },
+      "check": "design-grammar loads before the first UI file or mock, next to frontend-design"
+    },
+    {
+      "id": "component-in-brief",
+      "message": "show me three options for the settings screen of the phone app as mocks so I can pick one",
+      "situation": "visual-briefing competes for the decision page; the options are screens with components.",
+      "expect": {
+        "loads": true
+      },
+      "check": "design-grammar loads for the components even if visual-briefing loads too"
+    },
+    {
+      "id": "hooks-in-general",
+      "message": "how do hooks work in general in claude code, when does a PreToolUse one fire",
+      "situation": "A question about the tool, nothing visible.",
+      "expect": {
+        "loads": false
+      },
+      "check": "No Skill call naming design-grammar"
+    },
+    {
+      "id": "firestore-rules",
+      "message": "add a composite index for the trips collection ordered by startDate and fix the rule in firestore.rules that lets any user read another user's trips",
+      "situation": "Backend data and security rules.",
+      "expect": {
+        "loads": false
+      },
+      "check": "No Skill call naming design-grammar"
+    },
+    {
+      "id": "pr-description",
+      "message": "write the PR description for the dedupe fix on feat/dedupe-trips and merge it when it is green",
+      "situation": "Git and delivery work with no visual surface.",
+      "expect": {
+        "loads": false
+      },
+      "check": "No Skill call naming design-grammar; development-workflow may load"
+    },
+    {
+      "id": "mechanism-explainer",
+      "message": "explain how the sync queue loses a write, a diagram would help me see it",
+      "situation": "An explanation; visual-briefing owns how it is shown and no screen is designed.",
+      "expect": {
+        "loads": false
+      },
+      "check": "No Skill call naming design-grammar; visual-briefing may load"
+    },
+    {
+      "id": "spacing-word-nonvisual",
+      "message": "the spacing between retries in lib/data/upload_queue.dart is too tight, make the backoff 4, 8, 16 seconds and add a test",
+      "situation": "Shares the word spacing with the grammar but is a retry delay in code.",
+      "expect": {
+        "loads": false
+      },
+      "check": "No Skill call naming design-grammar"
+    },
+    {
+      "id": "figma-social-post",
+      "message": "hazme el post de Instagram para el speaker de barcamp, en Figma, con el estilo de la marca",
+      "situation": "A Figma post, not a UI. figma-assets owns it and calls design-grammar itself for the taste ledger, so the direct route is meant to go away.",
+      "expect": {
+        "loads": false
+      },
+      "check": "figma-assets loads first; design-grammar is called only through it, never before it"
+    }
+  ]
+}

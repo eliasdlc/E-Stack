@@ -1,0 +1,76 @@
+{
+  "about": "Expected routing for the whatsapp skill. tests/test_external_practices.py checks that this file is well formed; it runs no model, so it proves nothing about whether an agent routes this way. Run by hand per rules-and-skills when the description changes.",
+  "skill": "whatsapp",
+  "cases": [
+    {
+      "id": "what-did-she-say",
+      "message": "que me dijo Ana sobre el precio del logo? creo que fue el martes",
+      "situation": "No chat is pasted; the answer is in his WhatsApp.",
+      "expect": {"loads": true},
+      "check": "The whatsapp skill loads and search_messages or get_messages is called; the answer quotes one line"
+    },
+    {
+      "id": "search-my-chats-english",
+      "message": "Search my WhatsApp chats for the address the client sent for the meeting",
+      "situation": "Formal, names WhatsApp.",
+      "expect": {"loads": true},
+      "check": "The skill loads and search_messages runs"
+    },
+    {
+      "id": "group-agreement-typo",
+      "message": "en el grupo de la tesis q quedamos pa la entrega? revisa los mensajes",
+      "situation": "Casual with typos, never says WhatsApp.",
+      "expect": {"loads": true},
+      "check": "The skill loads and list_chats finds the group before reading it"
+    },
+    {
+      "id": "summarize-chat-week",
+      "message": "Resumeme lo que hablé con mi papá esta semana",
+      "situation": "A date range over one chat.",
+      "expect": {"loads": true},
+      "check": "get_messages with from and to of this week; the reply summarizes and does not paste the chat"
+    },
+    {
+      "id": "archive-not-saving",
+      "message": "El archivo de WhatsApp dejó de guardar desde ayer, por qué?",
+      "situation": "The archive itself, not a message.",
+      "expect": {"loads": true},
+      "check": "The skill loads and points at the GUI state and the repo's AGENTS.md before guessing"
+    },
+    {
+      "id": "write-message-to-send",
+      "message": "Escríbeme un WhatsApp corto para Carlos diciéndole que llego tarde",
+      "situation": "Writing for him to send, near miss on the word.",
+      "expect": {"loads": false},
+      "check": "A short warm message is written; the whatsapp skill does not load and no archive tool is called"
+    },
+    {
+      "id": "voice-note-file",
+      "message": "Transcribe esta nota de voz que me mandaron: ~/Downloads/WhatsApp Audio 2026-11-08.ogg",
+      "situation": "An attached audio file belongs to media.",
+      "expect": {"loads": false},
+      "check": "media loads and transcribes the file; whatsapp does not load"
+    },
+    {
+      "id": "whatsapp-video-encode",
+      "message": "Pasa este video a un formato que se pueda mandar por WhatsApp",
+      "situation": "Re-encoding a video, media's job.",
+      "expect": {"loads": false},
+      "check": "media loads; whatsapp does not"
+    },
+    {
+      "id": "whatsapp-api-question",
+      "message": "How does the WhatsApp Business Cloud API handle webhooks?",
+      "situation": "General question about WhatsApp, no archive involved.",
+      "expect": {"loads": false},
+      "check": "Answered from knowledge or the web; no archive tool is called"
+    },
+    {
+      "id": "conocerd-whatsapp-button",
+      "message": "Agrega el botón de WhatsApp en la ficha de negocio de ConoceRD",
+      "situation": "Product code that mentions WhatsApp.",
+      "expect": {"loads": false},
+      "check": "development-workflow drives the change; whatsapp does not load"
+    }
+  ]
+}

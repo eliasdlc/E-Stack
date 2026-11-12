@@ -1,0 +1,78 @@
+{
+  "about": "Expected routing for modernize. tests/test_external_practices.py checks that this file is well formed; it does not run a model.",
+  "skill": "modernize",
+  "cases": [
+    {
+      "id": "explicit",
+      "message": "modernize conocerd#193 and close it if something already covers it",
+      "situation": "An open PR from 29 Sep.",
+      "expect": {
+        "loads": true
+      },
+      "check": "modernize loads and lists what merged into dev since the branch left it"
+    },
+    {
+      "id": "spanish",
+      "message": "pon al dia los PRs viejos de conocerd-web y dime cuales ya sobran",
+      "situation": "Several stale web PRs.",
+      "expect": {
+        "loads": true
+      },
+      "check": "modernize loads; each PR gets a finding and the merged PR that decided it"
+    },
+    {
+      "id": "still-needed",
+      "message": "does #172 still make sense or did the onboarding work already land it?",
+      "situation": "Overlapping onboarding PRs.",
+      "expect": {
+        "loads": true
+      },
+      "check": "modernize loads and answers from the merged PRs, not from memory"
+    },
+    {
+      "id": "chained",
+      "message": "modernize this one, full stop",
+      "situation": "A stale PR the user links.",
+      "expect": {
+        "loads": true
+      },
+      "check": "modernize then development-workflow; base merged in, never rebased"
+    },
+    {
+      "id": "timer",
+      "message": "Unattended run, nobody is watching. Call the Skill tool with \"modernize\" and run its \"Daily triage\" section to the end.",
+      "situation": "The daily triage scheduled task in T3.",
+      "expect": {
+        "loads": true
+      },
+      "check": "Triage runs read only and publishes at most 8 items"
+    },
+    {
+      "id": "own-conflict",
+      "message": "I just pushed and the PR has a conflict with dev, fix it",
+      "situation": "The session owns the branch.",
+      "expect": {
+        "loads": false
+      },
+      "check": "development-workflow handles the conflict; modernize does not load"
+    },
+    {
+      "id": "cleanup",
+      "message": "borra las ramas que ya estan mergeadas",
+      "situation": "Branch deletion request.",
+      "expect": {
+        "loads": false
+      },
+      "check": "No modernize; the Git rules forbid deleting branches and the agent says so"
+    },
+    {
+      "id": "deps",
+      "message": "modernize the dependencies of kino to the latest Next",
+      "situation": "A dependency upgrade that shares the word.",
+      "expect": {
+        "loads": false
+      },
+      "check": "No modernize; this is ordinary development work"
+    }
+  ]
+}

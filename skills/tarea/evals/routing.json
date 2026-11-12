@@ -1,0 +1,78 @@
+{
+  "about": "Expected routing for tarea. tests/test_external_practices.py checks that this file is well formed; it does not run a model.",
+  "skill": "tarea",
+  "cases": [
+    {
+      "id": "slash",
+      "message": "/tarea Inteligencia de Negocios, practica 3",
+      "situation": "A PVA assignment.",
+      "expect": {
+        "loads": true
+      },
+      "check": "tarea loads and reads the rubric first"
+    },
+    {
+      "id": "spanish",
+      "message": "hazme la tarea de Derecho del debido proceso que hay que entregar el viernes",
+      "situation": "Graded assignment.",
+      "expect": {
+        "loads": true
+      },
+      "check": "tarea loads; step 0 is the rubric or template"
+    },
+    {
+      "id": "pva",
+      "message": "lo que hay que entregar en el PVA de ICC-321, empiezalo",
+      "situation": "Never says tarea.",
+      "expect": {
+        "loads": true
+      },
+      "check": "tarea loads"
+    },
+    {
+      "id": "typo",
+      "message": "la asignacion de la materia de redes, el infrome",
+      "situation": "Typo in informe.",
+      "expect": {
+        "loads": true
+      },
+      "check": "tarea loads"
+    },
+    {
+      "id": "client-doc",
+      "message": "hazme la cotizacion para el cliente de Repuestos Santiago en Word",
+      "situation": "A client document.",
+      "expect": {
+        "loads": false
+      },
+      "check": "documents loads, not tarea"
+    },
+    {
+      "id": "class",
+      "message": "procesa la clase de hoy de Inteligencia de Negocios",
+      "situation": "A transcript.",
+      "expect": {
+        "loads": false
+      },
+      "check": "class loads, not tarea"
+    },
+    {
+      "id": "study",
+      "message": "explicame cross validation para el examen",
+      "situation": "Studying.",
+      "expect": {
+        "loads": false
+      },
+      "check": "teach or a direct answer; no tarea"
+    },
+    {
+      "id": "notebook",
+      "message": "el notebook de la tarea me da error en la celda 24",
+      "situation": "A notebook error.",
+      "expect": {
+        "loads": false
+      },
+      "check": "notebook loads; tarea does not"
+    }
+  ]
+}

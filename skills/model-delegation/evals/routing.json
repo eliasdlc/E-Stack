@@ -1,0 +1,156 @@
+{
+  "about": "Expected routing and launcher for model-delegation: whether the skill loads, and where an agent runs (a separate T3 thread, a subagent inside the thread, or nothing). These are expectations for a model graded run over a transcript; tests/test_external_practices.py checks the shape only and runs no model.",
+  "skill": "model-delegation",
+  "cases": [
+    {
+      "id": "launch-agent-review-pr",
+      "message": "lanza un agente que revise el PR 84 de agents y me diga si esta listo para merge",
+      "situation": "A T3 session in the agents repo; the T3 tools are available.",
+      "expect": {
+        "loads": true,
+        "launcher": "t3 thread or subagent"
+      },
+      "check": "t3_thread_launch or a subagent (Agent tool or delegate_task), with the size choice named; no tmux, ssh with a CLI, nohup or background claude -p or codex exec"
+    },
+    {
+      "id": "launch-agent-minimal-lookup",
+      "message": "lanza un agente que me diga en que linea de hooks/registry.json se registra pr-door.sh",
+      "situation": "A T3 session in the agents repo; he says agente, the work is one grep.",
+      "expect": {
+        "loads": true,
+        "launcher": "subagent"
+      },
+      "check": "A subagent inside the thread (Agent tool or delegate_task), or the grep done directly; no t3_thread_launch for a one-line lookup"
+    },
+    {
+      "id": "launch-session-other-project",
+      "message": "Lanza una sesion para que termine el port de Hollowmere a Booga Linux, la quiero ver en t3code",
+      "situation": "A T3 session in the agents repo; booga-linux is a registered T3 project.",
+      "expect": {
+        "loads": true,
+        "launcher": "t3_thread_launch"
+      },
+      "check": "t3_thread_launch on the booga-linux project (projectId from t3_project_list); not a subagent and not a terminal launcher"
+    },
+    {
+      "id": "start-separate-agent-english",
+      "message": "Start a separate agent to update the conocerd-web dependencies on its own branch and open the PR.",
+      "situation": "A T3 session in the agents repo; conocerd-web is a registered T3 project.",
+      "expect": {
+        "loads": true,
+        "launcher": "t3_thread_launch"
+      },
+      "check": "t3_thread_launch with a worktree workspaceStrategy on conocerd-web; no tmux, ssh or background CLI"
+    },
+    {
+      "id": "subagent-small-lookup-typo",
+      "message": "lanza un subagnete que busque donde se registra el hook pr-door.sh y me diga la linea",
+      "situation": "A T3 session in the agents repo.",
+      "expect": {
+        "loads": true,
+        "launcher": "subagent"
+      },
+      "check": "The Agent tool or delegate_task inside this thread, or the lookup done directly; no t3_thread_launch for a one-line lookup"
+    },
+    {
+      "id": "launch-agent-vs-handoff",
+      "message": "lanza un agente en la laptop que retome lo de repuestos santiago donde lo dejamos",
+      "situation": "A T3 session on agentbox; the handoff skill also matches 'retome'.",
+      "expect": {
+        "loads": true,
+        "launcher": "agents t3-launch --host laptop"
+      },
+      "check": "`agents t3-launch --host laptop`, or, when it fails (the laptop asleep, or no relay set up there yet), a plain statement of that failure; never ssh to the laptop to start claude or tmux there, and never a block for him to paste"
+    },
+    {
+      "id": "minimal-work-split-in-agents",
+      "message": "Necesito tres datos rapidos de este repo: cuantas skills tienen evals/routing.json, cuantos hooks registra hooks/registry.json y si rules/CLAUDE.md tiene algun em dash. Repartelo en agentes en paralelo.",
+      "situation": "A T3 session in the agents repo; three lookups of seconds each, and he says agents.",
+      "expect": {
+        "loads": true,
+        "launcher": "subagent"
+      },
+      "check": "Subagents inside the thread (Agent tool or delegate_task), or the lookups done directly; no t3_thread_launch for seconds of work"
+    },
+    {
+      "id": "generic-implement-pick-model",
+      "message": "Implement retry with backoff in kino's sync worker; if part of it is mechanical, hand it to a cheaper model and keep the tricky part yourself.",
+      "situation": "A T3 session; the old trigger of the skill, a generic implementation request that weighs delegation and model choice.",
+      "expect": {
+        "loads": true,
+        "launcher": "subagent"
+      },
+      "check": "The skill loads to weigh delegation and model; any handoff is a subagent inside this thread with its type, never a T3 thread launch or a terminal launcher"
+    },
+    {
+      "id": "question-about-subagents",
+      "message": "Como funcionan los subagentes de Claude Code en general? solo explicame",
+      "situation": "A T3 session; a question, not a request to launch anything.",
+      "expect": {
+        "loads": false,
+        "launcher": "none"
+      },
+      "check": "An explanation with no Skill call for model-delegation and no launch of any kind"
+    },
+    {
+      "id": "handoff-block-only",
+      "message": "hazme el handoff para agentbox de lo que hicimos hoy",
+      "situation": "Elias wants the paste-ready block, not a launch.",
+      "expect": {
+        "loads": false,
+        "launcher": "none"
+      },
+      "check": "The handoff skill, no t3_thread_launch and no delegate_task"
+    },
+    {
+      "id": "tmux-sessions-list",
+      "message": "dime que sesiones de tmux hay abiertas en agentbox",
+      "situation": "A read-only status question that shares the word tmux and sessions.",
+      "expect": {
+        "loads": false,
+        "launcher": "none"
+      },
+      "check": "A tmux ls style read; no agent launched"
+    },
+    {
+      "id": "explain-pr-door-hook",
+      "message": "explicame que hace hooks/pr-door.sh y cuando reescribe el comando",
+      "situation": "A read-only question about a file in the repo.",
+      "expect": {
+        "loads": false,
+        "launcher": "none"
+      },
+      "check": "The file read and explained, no launch"
+    },
+    {
+      "id": "move-to-agentbox-before-shutdown",
+      "message": "Quiero que te vayas preparando para mover todo a Agent Box, porque pronto tendre que irme y apagar la computadora. No tienes que hacerlo ahorita, pero cuando sea seguro mueve cada cosa para alla",
+      "situation": "A laptop session orchestrating Kino work, 18 Oct 2026; the message never says agent, session or thread.",
+      "expect": {
+        "loads": true,
+        "launcher": "agents t3-launch --host agentbox"
+      },
+      "check": "`agents t3-launch --host agentbox` with the brief as message, and the thread title given to him; no tmux, no ssh starting claude, no handoff block for him to paste"
+    },
+    {
+      "id": "leaving-keep-it-running-english",
+      "message": "heading out in 10, shift whatever is still running over to agentbox so it keeps going while the laptop is off",
+      "situation": "A laptop session with work in progress; casual English.",
+      "expect": {
+        "loads": true,
+        "launcher": "agents t3-launch --host agentbox"
+      },
+      "check": "`agents t3-launch --host agentbox` for the work he moved (his message moves it, so the launch-in-t3 hook passes it); never asks him to open the thread"
+    },
+    {
+      "id": "ten-fixes-one-thread",
+      "message": "Arregla estos diez bugs del backlog de conocerd-web, cada uno en su PR, y avisame cuando esten todos en dev",
+      "situation": "A session in the conocerd-web repo, ten small independent fixes, he did not ask for sessions or threads",
+      "expect": {
+        "loads": true,
+        "launcher": "subagent"
+      },
+      "check": "Each PR is a subagent in its own worktree (Agent tool with isolation worktree, or delegate_task), two at a time; no t3_thread_launch, create_threads or agents t3-launch, and no continuation thread"
+    }
+  ]
+}

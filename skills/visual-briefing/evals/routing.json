@@ -1,0 +1,118 @@
+{
+  "about": "Expected routing and delivery for visual-briefing. These are expectations for a human or model graded run over a transcript. tests/test_visual_briefing.py checks that this file is well formed and consistent with the skill text; it does not run a model, so it proves nothing about whether an agent routes this way.",
+  "skill": "visual-briefing",
+  "cases": [
+    {
+      "id": "decisions-after-phase",
+      "message": "Finish the phase, and create an html if there are decisions.",
+      "situation": "Three decisions are open and the T3 render tools exist.",
+      "expect": {"loads": true, "purpose": "decide", "transport": "published", "publishes": true},
+      "check": "The page he asked for is published by build.py, and the three picks are asked with the question tool, each option named by what it does and the question carrying the link; no local file path is offered as the delivery"
+    },
+    {
+      "id": "standing-instruction",
+      "message": "(no new message; an earlier one said: whenever there are decisions, bring me the HTML)",
+      "situation": "A new round of decisions appears.",
+      "expect": {"loads": true, "purpose": "decide", "transport": "published", "publishes": true},
+      "check": "A new page with only the new round and one line to the previous one, published to Postplan, and the picks asked with the question tool"
+    },
+    {
+      "id": "answer-code-typed",
+      "message": "1A 2B 3AB",
+      "situation": "Answer to the round on screen.",
+      "expect": {"loads": false, "transport": "chat", "publishes": false},
+      "check": "Decisions are applied and no new page is rendered"
+    },
+    {
+      "id": "explain-mechanism",
+      "message": "Explain how the sync queue loses a write.",
+      "situation": "A diagram would carry the mechanism, more than a short answer.",
+      "expect": {"loads": true, "purpose": "understand", "transport": "inline", "publishes": false},
+      "check": "First screen carries the conclusion and the mechanism"
+    },
+    {
+      "id": "study-material",
+      "message": "Put all of it in an organized HTML so I can learn it.",
+      "situation": "Long material that will exceed one frame at 360 px.",
+      "expect": {"loads": true, "purpose": "read", "transport": "published", "publishes": true},
+      "check": "A published Postplan link drawn from data (an understand page); never a file path"
+    },
+    {
+      "id": "share-link",
+      "message": "Put it in a postplan and send me the link.",
+      "situation": "He asked to share.",
+      "expect": {"loads": true, "purpose": "decide", "transport": "published", "publishes": true},
+      "check": "build.py publishes the page and the link goes in the chat"
+    },
+    {
+      "id": "client-data-page",
+      "message": "Prepare the quote comparison for the clinic.",
+      "situation": "The page carries client data and he did not ask to share it.",
+      "expect": {"loads": true, "transport": "inline", "publishes": false},
+      "check": "No upload: the page carries client data, it is shown inline and a link waits until he asks for one"
+    },
+    {
+      "id": "outside-t3",
+      "message": "Show me the options.",
+      "situation": "The harness has no html_render.",
+      "expect": {"loads": true, "purpose": "decide", "transport": "published", "publishes": true},
+      "check": "Without html_render the options still go out as a Postplan page and its link, and the pick is asked with the question tool where the harness has one"
+    },
+    {
+      "id": "delegated-child",
+      "message": "(a delegated child drafts the page)",
+      "situation": "The child runs in its own thread.",
+      "expect": {"loads": true, "transport": "inline", "publishes": false, "renders": "principal"},
+      "check": "The child transcript has no html_render and returns a file path; the principal previews and renders"
+    },
+    {
+      "id": "new-component",
+      "message": "Show me how the new card would look before you touch the real ones.",
+      "situation": "A component Elias must approve.",
+      "expect": {"loads": true, "purpose": "decide", "transport": "inline", "publishes": false, "loads_also": ["design-grammar", "frontend-design"]},
+      "check": "design-grammar and frontend-design are called before the component is drawn, with every state"
+    },
+    {
+      "id": "short-answer",
+      "message": "Which branch is the PR on?",
+      "situation": "One line carries it.",
+      "expect": {"loads": false, "transport": "chat", "publishes": false},
+      "check": "Answer in the chat, no page"
+    },
+    {
+      "id": "closing-lines",
+      "message": "(end of a turn that did work)",
+      "situation": "The result is a few lines.",
+      "expect": {"loads": false, "transport": "chat", "publishes": false},
+      "check": "The closing paragraph in the chat"
+    },
+    {
+      "id": "message-for-others",
+      "message": "Draft the quote for the client.",
+      "situation": "A document for someone else.",
+      "expect": {"loads": false, "transport": "chat", "publishes": false},
+      "check": "Its own form; visual-briefing is not called"
+    },
+    {
+      "id": "ticket-body",
+      "message": "Put this in Zoho as tickets.",
+      "situation": "Ticket work.",
+      "expect": {"loads": false, "owner": "scrum", "publishes": false},
+      "check": "scrum is called; visual-briefing is not"
+    },
+    {
+      "id": "file-location",
+      "message": "Where should this audit live?",
+      "situation": "A question about folders.",
+      "expect": {"loads": false, "owner": "workspace-files", "publishes": false},
+      "check": "workspace-files answers; visual-briefing is not called"
+    },
+    {
+      "id": "upload-fails",
+      "message": "(any decision round)",
+      "situation": "The Postplan upload fails: no network or the instance is down.",
+      "expect": {"loads": true, "purpose": "decide", "transport": "file", "publishes": false},
+      "check": "A standalone HTML file under Documents plans, its path in the chat, and the failed upload named with its error"
+    }
+  ]
+}

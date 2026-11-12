@@ -1,0 +1,37 @@
+# History of the rules in model-delegation
+
+The incident or decision behind each rule of `SKILL.md`. The rule keeps its one-clause reason there; the story lives here.
+
+## Model and effort per class
+
+- Subagent types per class (decision 1A, 28 Oct 2026): in 30 days of laptop transcripts, 756 of 765 Agent calls passed no effort and 233 passed no model. `delegate_task` carried effort in 172 of 194 calls because T3 asks for it as a field. That is why the type carries model and effort in its frontmatter.
+- Model and effort per class (speed round, 26 Oct 2026, decision 12B): median context per turn was 499K in ConoceRD and 636K in Kino, and every turn pays for all of it. That is why a large listing goes through a subagent and a thread hands off. The line was 400K until 10 Nov 2026, when it moved to 300K to match the context-ceiling hook, which already paused at 300K.
+- Model routing round (plan.decruce.dev/d/vd1wcobh7agw, Elias answered "1A 2A 3A 4A 5A 6A 7A" on 10 Nov 2026). Lane 1 carried the hooks, the `scout` and `Explore` types and the settings; this lane the policy:
+  - 4A, scope first. Elias: "if i tell you to implement something you must understand the scope of it so that you decide whether to use subagents or spin off a new thread". The principal sizes the work and picks local, subagent or thread itself; past about 200K tokens or more than one PR it is a thread. `implementer` requires an acceptance command the child runs itself, because without one the Opus principal redoes the check anyway; such edits stay local. 4A runs as a two-week comparison read from the per class table of `agents scorecard` (tokens per merged PR, review rounds, reverts per class, model and effort); on 10 Nov, over 30 days, `implementer` on Sonnet medium read 23.8M tokens per merged PR against 62.9M on Opus medium and 137.8M on Sonnet high (measured, parent session attribution).
+  - 5A, escalation ladder: a way to verify, then one effort level up, then Fable 5.2 at medium per run on his word. It replaces the `xhigh` rule (`EFFORT_XHIGH` and `effort_quote` in `bin/delegation.py`); the quote gate now guards the Fable rung (`ESCALATION_FABLE`, `escalation_quote`). It partly reverses "lo que ibas a correr en fable correlo en opus" (19 Oct 2026): Fable returns, but only as the last rung and never by default. Source, not verified by us: Addy Osmani, claude.dev, 9 Nov 2026, Fable 5.2 high about equal to Opus 5.5 max on FrontierCode 2.0 at about half the cost per task, and past high the next model up at lower effort beats more effort. `/usage` shows a separate "Current week (Fable)" line (2% used on 10 Nov), which the launch-size rule reads before a Fable rung. Orchestrating moved to Opus medium because the settings already enforce medium.
+  - 6A, measurement: the per class table above, from `~/.claude/projects/**/subagents/*.meta.json` (`agentType`) and the `usage` of the matching `.jsonl`.
+  - 7A, low by default where a mistake is cheap to spot: the class pipeline's `claude -p` runs on Sonnet 5.5 medium, named in `class_watch.py` (in `eliasdlc/class-pipeline` since 11 Nov 2026) because a timer has no principal to inherit from; routing evals run at low effort and re-run only failed cases at high (the article's low-then-retry, about 97% at $0.17 against 95.3% at $0.29 all-high, its claim).
+- Elias, 19 Oct 2026, during the ConoceRD v0.17 rework: "sonnet 5.5 es para everyday coding ... si lo que se va a hacer es algo mas complejo, un trabajo mas profundo pues usamos opus"; and earlier "lo que ibas a correr en fable correlo en opus". That is the origin of Sonnet 5.5 medium for implementing and Opus 5.5 high for designing and orchestrating.
+- Launch size (decision 4A, 9 Nov 2026, plan.decruce.dev/d/0vm70989ulha): on 6 Nov four Opus lanes of the ConoceRD panel launched with little of the week left hit the 7-day limit at 04:19 UTC on 7 Nov and stopped every session for 25 h 41 min. Mocks v1 to v6 and persona councils v1 to v6 were about a quarter of that week's ConoceRD spend (estimated from token counts). From 6 to 9 Nov, 42 implementer Agent calls passed `model: opus` over the table, and 161 general-purpose calls (a type outside the table) did too; the 66% threshold leaves a third of the week for the work that follows a run; `CLAUDE_CODE_SUBAGENT_MODEL_FORCE` cannot fix that, because in Claude Code 2.1.319 it also overrides each type's frontmatter model, so architect would run on Sonnet.
+
+## Every agent runs in T3
+
+- Agents he could not see were agents he could not trust ("no los veo en t3 code", 26 Sep, 7, 15 and 18 Oct 2026).
+- 15 Oct 2026: a laptop session started the Repuestos Santiago agent inside tmux on agentbox after he asked for T3; he chose understanding over a blocking hook.
+- 18 Oct 2026: the Kino rework orchestrator, asked to "mover todo a Agent Box" before he shut the laptop, started itself inside tmux on agentbox, then, corrected, wrote a handoff for him to paste, because no T3 tool on the laptop reached agentbox. The prose had failed twice, so the `launch-in-t3` hook and the `agents t3-launch` relay replaced the plea.
+- The class pipeline exception: its `claude -p` steps run from systemd units because its Teams sweep and the laptop fallback over ssh are not agents and T3 has no cross-machine schedule.
+- 11 Oct 2026: an ETA question to a running child froze every agent twice. That is why a status question is answered from T3 reads and never steers a child.
+
+## One ask, one thread
+
+- Decision 1A and 2A, 10 Nov 2026 (plan.decruce.dev/d/jfkl1z39c847): agents opened 0 threads a week until 5 Oct, 58 in the week of 26 Oct after "one PR per T3 thread" (decision 7A), 122 the week after, and 92 in two days after the 300K context ceiling, 47 of them continuations. On 9 and 10 Nov they opened 24 top level threads against his 25, and he could no longer tell which thread was the main one. That is why a session's own work goes to subagents, a thread is launched only on his words, and a long thread compacts in place. The ceiling hook (PR 197, and its subagent half in PR 206) was removed.
+
+## Briefs
+
+- 6 Oct to 5 Nov 2026, laptop: subagents spent 28 percent of their time searching and reading against 19 percent for principals, 76 of the 128 hours of orientation. That is why a brief names the files, line ranges and facts already located.
+- One thread per delivery (decision 7A, 28 Oct 2026), 30 days to 28 Oct 2026: median turn 362K tokens, p90 754K, 165 of 690 sessions over 400K, ConoceRD v0.17 at a median of 645K.
+- Size, fix rounds and changed decisions: the round counts per PR come from the audit of the ConoceRD v0.17 rework (Documents/ConoceRD/dev/audits/2026-10-21-revisiones-rework-v017.md, Output 2); the requirement counts from the distinct R rows of the 18 PR bodies on 21 Oct 2026. PRs with five to nine requirements averaged 3.5 review rounds and those with one to four averaged 1.5; the three PRs at five rounds or more (#218, #223, #225) took half of all reviewer and implementer minutes. Elias's brief of 21 Oct 2026 named rounds that added new scope among the slowdowns.
+- Gates: "no necesitas mi verde para nada" (13 Oct 2026). The default is no gate.
+- Done: in the second and third passes of the 11 Oct run (the source wrote only "11"), packages were green alone and red together.
+- Time: three reviewers were cut at 300 s because the budget was a guess.
+- Files: parallel children editing one file lost each other's work.

@@ -1,0 +1,69 @@
+{
+  "about": "Expected routing for rules-and-skills. These are expectations for a human or model graded run over a transcript (see the Routing evals section of the skill). tests/test_external_practices.py checks that this file is well formed; it runs no model.",
+  "skill": "rules-and-skills",
+  "cases": [
+    {
+      "id": "new-hook",
+      "message": "Add a hook that blocks git push to main from any repo.",
+      "situation": "Session in ~/dev/agents.",
+      "expect": {"loads": true},
+      "check": "The Skill tool is called with rules-and-skills before the hook is written or registered"
+    },
+    {
+      "id": "rename-skill-spanish",
+      "message": "renombra la skill troubleshoot a diagnose y arregla todo lo que la mencione",
+      "situation": "Session in ~/dev/agents.",
+      "expect": {"loads": true},
+      "check": "Loads before any edit, because a rename touches the folder, the frontmatter name and every reference"
+    },
+    {
+      "id": "where-does-this-rule-go",
+      "message": "esto de no usar spinners deberia ir en el CLAUDE.md o en una skill? decide tu",
+      "situation": "No file named; he asks where a rule belongs.",
+      "expect": {"loads": true},
+      "check": "Applies the branch, no-op and copy tests and names the owner"
+    },
+    {
+      "id": "description-too-long",
+      "message": "the description of the scrum skill got cut off in the listing, shorten it without losing the triggers",
+      "situation": "Session in ~/dev/agents.",
+      "expect": {"loads": true},
+      "check": "Loads and keeps the description under 1024 characters, written for routing"
+    },
+    {
+      "id": "never-names-the-skill",
+      "message": "I keep correcting the same mistake in every session, make it stop for good",
+      "situation": "Session in ~/dev/agents after a repeated correction.",
+      "expect": {"loads": true},
+      "check": "Loads, and the answer chooses between a hook, a check and a sentence by whether it can be enforced"
+    },
+    {
+      "id": "product-repo-claude-md",
+      "message": "add the new Firebase project id to the Facts section of ConoceRD's AGENTS.md",
+      "situation": "Session in a product repository, not the agents repo.",
+      "expect": {"loads": false},
+      "check": "Edits the product contract through development-workflow; rules-and-skills is not needed"
+    },
+    {
+      "id": "explain-hooks-in-general",
+      "message": "how do Claude Code hooks work in general? what events are there?",
+      "situation": "A question, outside any change to the repo.",
+      "expect": {"loads": false},
+      "check": "Answered from knowledge or docs; no skill, because nothing in ~/dev/agents is being touched"
+    },
+    {
+      "id": "writing-a-prompt-for-a-client-app",
+      "message": "write the system prompt for the chatbot in the PetHospital app, short and friendly",
+      "situation": "Product work.",
+      "expect": {"loads": false},
+      "check": "A product prompt is product code; this skill is about Elias's own agent configuration"
+    },
+    {
+      "id": "university-checklist",
+      "message": "haz un checklist para repasar el examen de estadistica",
+      "situation": "Study request.",
+      "expect": {"loads": false},
+      "check": "A checklist for a person is not a skill; no load"
+    }
+  ]
+}

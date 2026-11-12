@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- The first time, build.py uploads the file, gets the id back and writes a
+     "postplan-draft" meta here. Never delete it: it keeps one URL per document. -->
+<title>Postplan reference design system</title>
+<style>
+/*FONTS*/
+/* ============================================================
+   POSTPLAN DESIGN SYSTEM, Editorial direction
+   Copy this whole <style> block into every document.
+   The FONTS marker on the first line is filled by build.py; leave it as is.
+
+   RULES
+   1. One self contained file. No CDN, no <link>, no frameworks:
+      Postplan blocks external resources.
+   2. --brand is the project color, read from its repo (theme, tailwind,
+      tokens). No project or no theme: leave the base blue and declare it in
+      the provenance. It is the ONLY accent; red/amber/green are states only.
+   3. Diagrams in inline SVG or CSS. ASCII forbidden.
+   4. JS allowed only for: scroll reveal, active section in the
+      bar, tabs/pickers, and the questions block. No fetch, no
+      frameworks, no animation loops. Every visible control works.
+   5. Animation: entrance once (transform/opacity) and state
+      transitions. Nothing continuous (pulse, shimmer, spin).
+   6. No emoji. No em dash. Paragraphs of 3 lines. One fact per block.
+   7. It is read on a phone first: check 390px before uploading.
+   8. Variable text never lives in a fixed width box: min-width plus
+      padding. A fixed width fits the mock's label and bursts with
+      the next one.
+   9. A component is the markup that goes into the repo, at its real size,
+      inside a .stage. Real px, real tokens, real strings, every state. The
+      stage scales it to the column with a transform and stops at 11 px of
+      text, then pans. Nothing is redrawn to fit and nothing is approximated:
+      what Elias picks is what gets implemented, value for value.
+  10. A decision is taken looking at what it decides. The options of a .q are
+      components (.pick), not lines of text, and they carry the problem and the
+      solution above them. Elias should never scroll up to find how anything looked.
+  11. Every option is genuinely pickable: no filler and no "keep as is"
+      without a reason. Two options is an alarm: look for the third. A single
+      real path goes with data-single. Compatible options go with data-multi
+      (several get picked). The script adds a note and the option X
+      "another answer" to each .q, and stores what was picked in the browser per URL.
+   ============================================================ */
+:root{
+  --pg:#000;--pg-2:#0a0a0c;--pg-3:#121216;--ln:#1f1f25;--ln-2:#2b2b33;
+  --tx:#f2f2f5;--tx-2:#a6a6b0;--tx-3:#6f6f7a;
+  --ok:#35c759;--warn:#f5a623;--bad:#ff453a;
+  /* Project brand color. REPLACE these three lines with the ones from the
+     repo; --on is the text that sits on top of --brand. */
+  --brand:#5B8DEF;--brand-2:#2F63D6;--on:#fff;
+  --ease:cubic-bezier(.2,.7,.2,1);
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  /* The fonts render again: our own instance sends font-src data:, which the
+     hosted service never did. A document opened from postplan.dev still falls
+     back to the system stack, and that is what the fallbacks are for. */
+  --sans:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --display:"Bricolage Grotesque",var(--sans);
+  --r:14px;--rs:10px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--pg);color:var(--tx-2);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--tx);text-decoration:none}
+h1,h2,h3,h4{color:var(--tx);margin:0;line-height:1.12;letter-spacing:-.025em}
+h1,h2,.big{font-family:var(--display);font-weight:700}
+p{margin:0}
+b{color:var(--tx);font-weight:600}
+code{font-family:var(--mono);font-size:.88em;background:var(--pg-3);border:1px solid var(--ln);border-radius:6px;padding:1px 6px;color:var(--tx)}
+pre.code{background:var(--pg-2);border:1px solid var(--ln);border-radius:var(--r);padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--tx-2);margin:0 0 20px}
+pre.code code{background:none;border:0;padding:0}
+.wrap{max-width:1140px;margin:0 auto;padding:0 24px}
+@media (max-width:640px){.wrap{padding:0 14px}}
+.rv{opacity:0;transform:translateY(14px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}*{transition-duration:.01ms!important;animation:none!important}}
+
+/* ---- sticky bar: only if the doc has 3+ sections ---- */
+.bar{position:sticky;top:0;z-index:50;background:rgba(0,0,0,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--ln)}
+.bar .wrap{display:flex;align-items:center;gap:14px;height:58px}
+.bar .logo{font-family:var(--display);font-weight:700;color:var(--tx);display:flex;align-items:center;gap:9px;white-space:nowrap;font-size:15px}
+.bar .logo i{width:10px;height:10px;border-radius:3px;background:var(--brand);display:inline-block}
+.bar nav{display:flex;gap:2px;overflow:auto;scrollbar-width:none}
+.bar nav::-webkit-scrollbar{display:none}
+.bar nav a{font-size:13px;color:var(--tx-3);padding:6px 9px;border-radius:8px;white-space:nowrap}
+.bar nav a.on,.bar nav a:hover{color:var(--tx);background:var(--pg-3)}
+.bar .ctl{margin-left:auto;display:flex;gap:8px;align-items:center;flex:none;overflow:auto;scrollbar-width:none}
+.bar .ctl::-webkit-scrollbar{display:none}
+@media (max-width:900px){.bar nav{display:none}}
+.seg{display:inline-flex;background:var(--pg-3);border:1px solid var(--ln-2);border-radius:9px;padding:3px;gap:2px}
+.seg button{appearance:none;background:none;border:0;color:var(--tx-3);font:inherit;font-size:12.5px;font-weight:600;padding:5px 10px;border-radius:6px;cursor:pointer;min-height:30px;transition:color .2s,background .2s;white-space:nowrap}
+.seg button[aria-pressed="true"]{color:var(--on);background:var(--brand)}
+
+/* ---- header ---- */
+.hero{padding:64px 0 44px;border-bottom:1px solid var(--ln)}
+.kick{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--brand);font-weight:700;margin-bottom:16px}
+.hero h1{font-size:clamp(32px,5.5vw,60px);max-width:17ch;margin-bottom:18px;line-height:1.04}
+.hero h1 em{font-style:normal;color:var(--brand)}
+.hero .lede{font-size:clamp(17px,2vw,19px);max-width:62ch}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:28px}
+@media (max-width:720px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{border:1px solid var(--ln);border-radius:var(--r);padding:14px 16px;background:var(--pg-2)}
+.stat .big{font-size:32px;color:var(--tx);line-height:1;letter-spacing:-.03em}
+.stat .big small{font-size:14px;color:var(--brand);font-family:var(--sans);font-weight:700;margin-left:4px;letter-spacing:0}
+.stat span{display:block;font-size:13px;color:var(--tx-3);margin-top:6px}
+/* "what I need from you": goes in the header of any doc that expects a decision */
+.ask{margin-top:24px;border:1px solid var(--brand);border-radius:var(--r);padding:16px 18px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;background:color-mix(in srgb,var(--brand) 8%,transparent)}
+.ask svg{width:22px;height:22px;stroke:var(--brand);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-top:2px}
+.ask b{display:block;margin-bottom:2px}
+
+/* ---- sections ---- */
+section{padding:56px 0;border-bottom:1px solid var(--ln)}
+section:last-of-type{border-bottom:0}
+.sh{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+.sh .n{font-size:13px;color:var(--brand);font-weight:800;letter-spacing:.08em}
+.sh h2{font-size:clamp(25px,3.2vw,38px)}
+.sub{max-width:66ch;font-size:16.5px;margin-bottom:28px}
+/* The size belongs to the tag; .hero and .sh only enlarge it. Until 19 sep
+   only `.hero h1` and `.sh h2` carried one, so a document that skipped the
+   chrome rendered its headline at the browser default, 32 px on a 1440 screen
+   against the 60 it should have, and its h2 at 24. */
+h1{font-size:clamp(30px,4.6vw,46px);margin-bottom:16px}
+h2{font-size:clamp(23px,2.8vw,30px)}
+h3{font-size:19px;margin:36px 0 12px}
+
+/* ---- tiles: one fact or one idea per card ---- */
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+@media (max-width:900px){.g3,.g4{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.tile{background:var(--pg-2);border:1px solid var(--ln);border-radius:var(--r);padding:18px 18px 20px;transition:border-color .2s}
+.tile:hover{border-color:var(--ln-2)}
+.tile .k{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx-3);margin-bottom:8px;font-weight:700}
+.tile h4{font-size:17px;margin-bottom:6px}
+.tile>p{font-size:14.5px}
+.tile .cnt{float:right;font-family:var(--display);font-size:26px;color:var(--brand);line-height:1;letter-spacing:-.02em}
+
+/* ---- finding: the audit block ---- */
+.finding{background:var(--pg-2);border:1px solid var(--ln);border-left:3px solid var(--bad);border-radius:var(--r);padding:16px 18px;margin:0 0 10px}
+.finding.warn{border-left-color:var(--warn)}
+.finding.info{border-left-color:var(--brand)}
+.finding.low{border-left-color:var(--ln-2)}
+.finding .head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.finding .head h4{font-size:15.5px}
+.finding>p{font-size:14.5px;max-width:78ch}
+.finding .where{color:var(--tx-3);font-size:12px;font-family:var(--mono);margin-top:8px}
+.tag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:5px;background:var(--bad);color:#fff}
+.tag.warn{background:var(--warn);color:#000}
+.tag.info{background:var(--brand);color:var(--on)}
+.tag.mute{background:var(--pg-3);color:var(--tx-2);border:1px solid var(--ln-2)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--tx-3);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--tx-3)}
+.pill.ok::before{background:var(--ok)}
+.pill.warn::before{background:var(--warn)}
+.pill.bad::before{background:var(--bad)}
+.pill.brand::before{background:var(--brand)}
+
+/* ---- meters ---- */
+.meter{display:grid;gap:10px;margin-top:8px}
+.meter div{display:grid;grid-template-columns:180px 1fr 36px;gap:12px;align-items:center;font-size:14px}
+@media (max-width:560px){.meter div{grid-template-columns:120px 1fr 30px}}
+.meter i{height:8px;border-radius:4px;background:var(--pg-3);display:block;position:relative;overflow:hidden}
+.meter i::after{content:"";position:absolute;inset:0;width:var(--v);background:var(--brand);border-radius:4px;transform:scaleX(0);transform-origin:left;transition:transform .8s var(--ease)}
+.in .meter i::after{transform:none}
+.meter span{text-align:right;color:var(--tx-3);font-variant-numeric:tabular-nums}
+
+/* ---- timeline ---- */
+.tl{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;margin:14px 0 0}
+@media (max-width:760px){.tl{grid-auto-flow:row;grid-template-columns:repeat(3,1fr)}}
+.tl div{border-top:2px solid var(--ln-2);padding-top:10px;font-size:12.5px;position:relative}
+.tl div::before{content:"";position:absolute;top:-6px;left:0;width:10px;height:10px;border-radius:50%;background:var(--brand)}
+.tl div.mute::before{background:var(--ln-2)}
+.tl b{display:block;font-size:13px;margin-bottom:2px;font-variant-numeric:tabular-nums}
+.tl span{color:var(--tx-3);display:block;line-height:1.35}
+
+/* ---- ordered steps ---- */
+ol.steps{list-style:none;counter-reset:s;padding:0;margin:0 0 20px;max-width:78ch}
+ol.steps li{counter-increment:s;position:relative;padding-left:40px;margin-bottom:14px;font-size:15px}
+ol.steps li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:1px;font-family:var(--display);font-weight:700;color:var(--brand);font-size:15px;letter-spacing:0}
+
+/* ---- route: what the work goes through after a pick ---- */
+ol.route{list-style:none;counter-reset:r;padding:0;margin:4px 0 22px;max-width:80ch}
+ol.route li{counter-increment:r;position:relative;padding:12px 14px 12px 44px;border:1px solid var(--ln);border-radius:var(--r);background:var(--pg-2);margin-bottom:8px}
+ol.route li::before{content:counter(r);position:absolute;left:14px;top:12px;font-family:var(--display);font-weight:700;color:var(--tx-3);font-size:15px}
+ol.route li.you{border-color:var(--brand)}
+ol.route li.you::before{color:var(--brand)}
+ol.route b{display:block;font-size:15px;color:var(--tx);font-weight:600;line-height:1.35}
+ol.route span,ol.route i{display:block;font-size:12.5px;color:var(--tx-3);font-style:normal;line-height:1.5;margin-top:2px}
+ol.route i::before{content:"closes when ";color:var(--tx-3);opacity:.7}
+ol.route li.you b::after{content:"needs you";margin-left:8px;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--brand);font-weight:700;vertical-align:1px}
+
+/* ---- tables ---- */
+.tblwrap{overflow:auto;margin:8px 0 6px}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th{text-align:left;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx-3);font-weight:700;padding:10px 14px 10px 0;border-bottom:1px solid var(--ln-2);white-space:nowrap}
+td{padding:12px 14px 12px 0;border-bottom:1px solid var(--ln);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td:first-child{color:var(--tx);font-weight:600}
+.chip{display:inline-block;font-size:11.5px;border:1px solid var(--ln-2);border-radius:999px;padding:2px 9px;color:var(--tx-2);margin:2px 4px 2px 0;white-space:nowrap}
+.chip.b{border-color:var(--brand);color:var(--brand)}
+
+/* ---- callout ---- */
+.callout{border:1px solid var(--ln-2);border-left:3px solid var(--brand);border-radius:var(--r);background:var(--pg-2);padding:14px 18px;margin:0 0 20px;max-width:80ch;font-size:14.5px}
+.callout.risk{border-left-color:var(--bad)}
+.callout .label{color:var(--tx-3);font-size:11px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:5px;font-weight:800}
+.callout.risk .label{color:var(--bad)}
+
+/* ---- before / after ---- */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:760px){.cmp{grid-template-columns:1fr}}
+.cmp>div{border:1px solid var(--ln);border-radius:var(--r);overflow:hidden;background:var(--pg-2)}
+.cmp .lab{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx-3);padding:10px 14px;border-bottom:1px solid var(--ln);font-weight:700}
+.cmp .lab.new{color:var(--brand)}
+.cmp .body{padding:16px}
+
+/* ---- SVG diagrams: flows, architectures ---- */
+.flow{width:100%;height:auto;display:block;margin:10px 0 6px}
+.flow text{font-family:var(--sans);fill:var(--tx);font-size:13px;font-weight:600}
+.flow .m{fill:var(--tx-3);font-weight:500;font-size:11.5px}
+.flow rect{fill:var(--pg-2);stroke:var(--ln-2)}
+.flow rect.hot{stroke:var(--brand)}
+.flow path{stroke:var(--tx-3);fill:none;stroke-width:1.5;marker-end:url(#ar)}
+.flow #ar path{fill:var(--tx-3);stroke:none}
+
+/* ---- phone frame for mobile mocks ---- */
+.phones{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.phones>*{container-type:inline-size}
+.phone{aspect-ratio:390/844;border-radius:40px;border:5px solid #1c1c20;box-shadow:0 0 0 1px #3a3a40;overflow:hidden;background:#fff;color:#111;position:relative;font-size:calc(100cqw / 24)}
+/* The container context goes on the wrapper, never on .phone: a
+   container does not query itself and cqw would fall back to the viewport, so
+   the mocks look fine at 390px and gigantic on desktop. */
+.phone.dark{background:#0b0b0e;color:#eee}
+.phone figcaption{display:none}
+figure.phf{margin:0}
+figure.phf>figcaption{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--tx-3);margin-top:10px;text-align:center;font-weight:700}
+
+/* ---- folded long tail ---- */
+details{border-top:1px solid var(--ln);padding:14px 0}
+details summary{cursor:pointer;color:var(--tx);font-size:14.5px;font-weight:700;list-style:none;display:flex;align-items:center;gap:10px}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"+";color:var(--brand);font-weight:400;font-size:18px;line-height:1}
+details[open] summary::before{content:"\2212"}
+details summary .count{color:var(--tx-3);font-weight:400;font-size:12.5px}
+details .body{padding:14px 0 4px 24px;font-size:14.5px}
+
+/* ---- decision questions ---- */
+.q{border:1px solid var(--ln);border-radius:var(--r);padding:18px 18px 16px;background:var(--pg-2);margin-bottom:12px}
+.q .qh{display:flex;gap:12px;align-items:baseline;margin-bottom:12px}
+.q .qn{font-family:var(--display);font-size:22px;color:var(--brand);font-weight:700;line-height:1;min-width:28px}
+.qh h4{font-size:17px}
+.opts{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.opt{appearance:none;font:inherit;cursor:pointer;text-align:left;border:1px solid var(--ln-2);border-radius:var(--rs);padding:10px 12px;background:var(--pg);color:var(--tx-2);font-size:14px;display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start;transition:border-color .2s,background .2s}
+.opt:hover{border-color:var(--tx-3)}
+.opt b.l{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-size:12px;font-weight:800;background:var(--pg-3);color:var(--tx);border:1px solid var(--ln-2)}
+.opt[aria-pressed="true"]{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 10%,transparent)}
+.opt[aria-pressed="true"] b.l{background:var(--brand);color:var(--on);border-color:var(--brand)}
+.opt small{display:block;color:var(--tx-3);font-size:12.5px;margin-top:2px}
+.opt .rec,.pick .rec{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--brand);font-weight:800;margin-left:6px;white-space:nowrap}
+.answers{position:sticky;bottom:12px;margin-top:18px;display:flex;gap:12px;align-items:center;background:var(--pg-3);border:1px solid var(--ln-2);border-radius:var(--r);padding:12px 14px;flex-wrap:wrap}
+.answers code{font-size:14px;padding:4px 10px;background:var(--pg)}
+.answers button{appearance:none;font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:var(--rs);padding:9px 14px;background:var(--brand);color:var(--on);font-size:13.5px;margin-left:auto}
+.answers .hint{font-size:12.5px;color:var(--tx-3)}
+.answers code{white-space:pre-wrap;line-height:1.5;max-width:100%}
+/* note and own answer: the script adds them to every .q */
+.qnote{display:block;width:100%;margin-top:12px;background:var(--pg);border:1px solid var(--ln-2);border-radius:var(--rs);color:var(--tx);font:inherit;font-size:14px;line-height:1.45;padding:10px 12px;min-height:46px;resize:vertical}
+.qnote::placeholder{color:var(--tx-3)}
+.qmulti{margin-left:auto;font-size:10.5px;color:var(--brand);letter-spacing:.08em;text-transform:uppercase;font-weight:800;white-space:nowrap;align-self:center}
+.pick.pk-own,.opt.pk-own{border-style:dashed}
+
+/* ---- the component, at its real size ----
+   A component in a document is the markup that goes into the repo: real px,
+   real tokens, real strings. .stage never rewrites it. It measures the natural
+   width the component declares in --sw and scales the whole subtree with a
+   transform, so nothing reflows and every proportion survives.
+
+   The floor beats the fit. Scaling stops when the smallest text in the
+   component reaches 11 px; past that the stage pans sideways instead of
+   shrinking, because a component nobody can read decides nothing. Measured
+   19 sep: 36 of 48 components in the corpus carried text under 11 px at 390,
+   some at 3.8 px, and the old divisor could not see it.
+
+   --sw is the width the component is authored at (393 for a phone piece,
+   1280 for a desktop one). Nothing else is needed: no divisor, no em rewrite.
+
+   The .st root also declares the product's font-family, background and color
+   inline, from its DESIGN.md, so the component wears the product and not this
+   document (measured 20 sep: every component in the corpus inherited Figtree
+   on black). build.py refuses one that does not. */
+.stage{display:block;position:relative;overflow:hidden;width:100%}
+.stage.pan{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
+.stage>.st{display:block;transform-origin:top left;width:var(--sw,393px)}
+.stage.dark{background:#0b0b0e;border-radius:12px}
+
+/* a phone frame is a stage with a bezel, not a second mechanism */
+.st.frame{border-radius:40px;border:5px solid #1c1c20;box-shadow:0 0 0 1px #3a3a40;
+  overflow:hidden;background:#fff;color:#111;height:844px;box-sizing:border-box}
+.st.frame.dark{background:#0b0b0e;color:#eee}
+
+/* every state of the component, side by side, which is what a decision needs */
+.states{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr))}
+.states figcaption{font-size:11.5px;color:var(--tx-3);margin-top:6px;font-family:var(--mono)}
+
+/* ---- evidence figure: a capture or a chart with what it proves ----
+   The best block in the whole corpus was hand rolled inside one document and
+   died there (viaje-real-nueve-puntos, 18 sep). It is a primitive now. */
+figure.ev{margin:0 0 18px;border:1px solid var(--ln);border-radius:var(--r);overflow:hidden;background:var(--pg-2)}
+figure.ev img{display:block;width:100%;height:auto}
+figure.ev figcaption{font-size:13px;color:var(--tx-2);padding:10px 14px;line-height:1.5;border-top:1px solid var(--ln)}
+figure.ev figcaption b{color:var(--tx)}
+.evpair{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+/* the channel that produced the evidence, before the reader looks at it */
+.chan{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--tx-3);border:1px solid var(--ln-2);border-radius:5px;padding:1px 6px;margin-bottom:8px}
+.chan.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent)}
+.chan.no{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+
+/* ---- the index: the whole document on the first screen ----
+   Measured 19 sep: the part Elias needs is a median of 224 words, but the
+   first question sat at word 1,557, screen 8.8 of a phone. */
+.index{border:1px solid var(--ln);border-radius:var(--r);padding:6px 4px;margin:18px 0 26px}
+.index a{display:flex;gap:10px;padding:9px 12px;border-radius:9px;color:var(--tx-2);font-size:14px;line-height:1.35}
+.index a:hover{background:var(--pg-3);color:var(--tx)}
+.index a i{font-family:var(--mono);font-style:normal;color:var(--tx-3);font-size:12px;padding-top:2px;flex:none}
+
+/* ---- decision with components: the option IS the component ----
+   The block carries question, problem, solution and the options, and every option
+   shows what it decides. Elias never has to scroll up to find how anything looks. */
+.qbody{display:grid;gap:8px;margin-bottom:6px;max-width:78ch}
+.qbody p{font-size:14.5px}
+.picks{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));margin-top:14px}
+.pick{appearance:none;font:inherit;text-align:left;cursor:pointer;border:1px solid var(--ln-2);border-radius:var(--r);background:var(--pg);color:var(--tx-2);padding:12px;display:flex;flex-direction:column;gap:10px;transition:border-color .2s,background .2s;width:100%}
+.pick:hover{border-color:var(--tx-3)}
+.pick[aria-pressed="true"]{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 10%,transparent)}
+.pick .pk-hd{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:start}
+.pick b.l{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-size:12px;font-weight:800;background:var(--pg-3);color:var(--tx);border:1px solid var(--ln-2)}
+.pick[aria-pressed="true"] b.l{background:var(--brand);color:var(--on);border-color:var(--brand)}
+.pick .pk-t{color:var(--tx);font-weight:600;font-size:14.5px;line-height:1.3}
+.pick .pk-st{display:none;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--brand);white-space:nowrap;padding-top:4px}
+.pick[aria-pressed="true"] .pk-st{display:block}
+.pick>small{display:block;color:var(--tx-3);font-size:12.5px}
+/* 390 px: the page padding and the option padding together eat 74 px, which
+   drops a 393 component to 0.80 and its 12 px label to 9.7. Edge to edge the
+   same component lands at 0.93 and clears the floor. */
+@media (max-width:460px){
+  .picks{gap:10px}
+  .pick{margin-inline:-18px;width:auto;border-radius:12px;padding:12px 8px}
+}
+
+/* ---- only for the example on this reference page ---- */
+.st.example{background:#fff;color:#111;border-radius:12px;padding:16px;display:flex;align-items:center;gap:16px;box-sizing:border-box}
+.st.example svg{width:64px;height:64px;flex:none;color:#111}
+.st.example .cap{font-size:15px;font-weight:600;color:#333}
+
+/* ---- tables at 390 ----
+   19 sep: the four column table of a real document lost its last two columns
+   off the right edge, because a <code> cell has no break opportunity and sets
+   a min-width the container cannot honour. Breaking inside code comes first,
+   and the scroll is the fallback for what still does not fit. */
+table code{overflow-wrap:break-word}
+@media (max-width:560px){
+  .tw{display:block;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;position:relative}
+  .tw>table{min-width:560px}
+  .tw th:first-child,.tw td:first-child{min-width:130px}
+  .tw th,.tw td{font-size:13px}
+  /* A table that scrolls and does not say so is a table whose last column
+     nobody reads. The class is set by the script when it really overflows. */
+  .tw.scrolls{border-right:1px solid var(--ln)}
+  .tw.scrolls::after{content:"";position:sticky;right:0;top:0;float:right;width:34px;height:100%;
+    background:linear-gradient(90deg,transparent,var(--pg));pointer-events:none}
+  .tw.scrolls>table{margin-bottom:22px}
+  .twhint{position:absolute;right:0;bottom:0;font-size:11px;color:var(--tx-3);
+    font-family:var(--mono);background:var(--pg);padding:2px 0 0 8px}
+}
+.twhint{display:none}
+@media (max-width:560px){.tw.scrolls .twhint{display:block}}
+
+/* ---- provenance ---- */
+.prov{font-size:13px;color:var(--tx-3);line-height:1.7;max-width:80ch;padding:28px 0 56px}
+.prov b{color:var(--tx-2)}
+.prov.over{border-left:2px solid var(--warn);padding-left:12px;color:var(--tx-2)}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <a class="logo" href="#top"><i></i>Postplan</a>
+    <nav id="nav"><a href="#structure">Structure</a><a href="#blocks">Blocks</a><a href="#questions">Questions</a></nav>
+  </div>
+</header>
+
+<main id="top">
+
+<div class="hero"><div class="wrap">
+  <p class="kick">Design system, Postplan documents, v2</p>
+  <h1>Every block a document can use, at <em>real</em> size.</h1>
+  <p class="lede">The agent copies the style block, swaps --brand for the project color and builds the document out of these pieces alone. A document that needs a piece that is not here is a document that needs rewriting, not a new piece.</p>
+  <div class="stats">
+    <div class="stat"><div class="big">1<small>file</small></div><span>self contained, no network</span></div>
+    <div class="stat"><div class="big">390<small>px</small></div><span>read on a phone first</span></div>
+    <div class="stat"><div class="big">3<small>lines</small></div><span>maximum per paragraph</span></div>
+    <div class="stat"><div class="big">1<small>accent</small></div><span>the project brand color</span></div>
+  </div>
+  <div class="ask">
+    <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2-3 4"/><path d="M12 17h.01"/></svg>
+    <div><b>What I need from you</b>This block opens any document that expects a decision: it says in two lines what Elias has to answer and where.</div>
+  </div>
+</div></div>
+
+<section id="structure"><div class="wrap">
+  <div class="sh rv"><span class="n">01</span><h2>Structure of a document</h2></div>
+  <p class="sub rv">The fixed order, written by <code>build.py &lt;file.html&gt; --new --type &lt;type&gt;</code> and refused by <code>build.py</code> when a piece of it is missing. The recipe for the type (recipes.md) decides what goes in the body; this does not change.</p>
+  <ol class="steps rv">
+    <li><b>Sticky bar</b> with sections, only if there are three or more. On mobile the links hide, not the bar.</li>
+    <li><b>Header:</b> kicker (project, type, date), an h1 that is the conclusion and not the task, a lede of 4 lines, 2 to 4 stats, and the "what I need from you" block if a decision is pending.</li>
+    <li><b>Body in numbered sections</b> only if they are a sequence or a ranking; otherwise, h2 with no number.</li>
+    <li><b>Decision questions</b> at the end, with the answers composer.</li>
+    <li><b>Provenance:</b> files, commits, dates, and everything estimated or invented, marked.</li>
+  </ol>
+  <div class="callout rv"><span class="label">Golden rule</span>The conclusion first, always. The h1 is the finding. If Elias only reads the header, he already knows what to decide.</div>
+</div></section>
+
+<section id="blocks"><div class="wrap">
+  <div class="sh rv"><span class="n">02</span><h2>The blocks</h2></div>
+  <p class="sub rv">Really rendered. Inspect this page to copy the exact markup.</p>
+
+  <h3 class="rv">Tiles: one idea per card</h3>
+  <div class="grid g3 rv">
+    <div class="tile"><span class="cnt">5</span><p class="k">Kicker</p><h4>Short title</h4><p>Two or three lines at most. The floating number is optional.</p></div>
+    <div class="tile"><p class="k">No number</p><h4>These work too</h4><p>For facts that orient before going down into the detail.</p></div>
+    <div class="tile"><p class="k">Density</p><h4>3 per row, 1 on mobile</h4><p>If a tile needs scrolling, it is two tiles.</p></div>
+  </div>
+
+  <h3 class="rv">Findings with severity</h3>
+  <div class="rv">
+    <div class="finding"><div class="head"><span class="tag">Critical</span><h4>The title states the problem as a fact</h4></div><p>Two or three sentences. If it needs four paragraphs, it is two findings.</p><p class="where">app/lib/core/gps/simulator.dart closePositionStream</p></div>
+    <div class="finding warn"><div class="head"><span class="tag warn">Attention</span><h4>Amber for what can wait a sprint</h4><span class="pill brand">tracked</span></div><p>The pills mark state: ok, warn, bad, brand.</p><p class="where">web/src/routes/index.tsx</p></div>
+    <div class="finding low"><div class="head"><span class="tag mute">Note</span><h4>Gray for the record with no urgency</h4></div><p>No color rail: it does not compete for attention.</p></div>
+  </div>
+
+  <h3 class="rv">Meters and timeline</h3>
+  <div class="rv">
+    <div class="meter">
+      <div><b>Audit</b><i style="--v:100%"></i><span>5</span></div>
+      <div><b>Plan</b><i style="--v:80%"></i><span>4</span></div>
+    </div>
+    <div class="tl" style="margin-top:22px">
+      <div><b>week 1</b><span>identity</span></div>
+      <div><b>week 2</b><span>core screens</span></div>
+      <div class="mute"><b>week 3</b><span>pending</span></div>
+    </div>
+  </div>
+
+  <h3 class="rv">Before / after and diagrams</h3>
+  <div class="cmp rv">
+    <div><div class="lab">Before</div><div class="body"><p style="font-size:14px">Reproduce the current state with the real values from the code, not a caricature.</p></div></div>
+    <div><div class="lab new">After</div><div class="body">
+      <svg class="flow" viewBox="0 0 300 60"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5 0 10z"/></marker></defs>
+      <rect x="4" y="10" width="80" height="40" rx="8"/><text x="44" y="34" text-anchor="middle">Source</text>
+      <rect x="120" y="10" width="80" height="40" rx="8" class="hot"/><text x="160" y="34" text-anchor="middle">Change</text>
+      <rect x="216" y="10" width="80" height="40" rx="8"/><text x="256" y="34" text-anchor="middle">Effect</text>
+      <path d="M84 30H116"/><path d="M200 30H212"/></svg>
+      <p style="font-size:12.5px;color:var(--tx-3)">Diagrams: inline SVG with these classes. Never ASCII.</p>
+    </div></div>
+  </div>
+
+  <h3 class="rv">Mobile mocks</h3>
+  <div class="phones rv" style="max-width:560px">
+    <figure class="phf"><span class="stage"><span class="st frame" style="--sw:393px;width:393px;font-family:'Fraunces',serif;background:#fbf6f4;color:#2a1a1c"><div style="padding:48px 32px"><p style="font-size:26px;font-weight:800;color:#111;margin:0">393x844, real px</p><p style="font-size:15px;color:#555;margin-top:8px">Real tokens from the repo, real strings from the string source, domain data. This markup is what gets pasted into the component.</p></div></span></span><figcaption>current</figcaption></figure>
+    <figure class="phf"><span class="stage"><span class="st frame dark" style="--sw:393px;width:393px;font-family:'Fraunces',serif;background:#1a0b0d;color:#f3e7e4"><div style="padding:48px 32px"><p style="font-size:26px;font-weight:800;color:#eee;margin:0">Every state it has</p><p style="font-size:15px;color:#999;margin-top:8px">Dark, empty, error, and one frame with ugly data: a name that never ends, a list with nothing in it.</p></div></span></span><figcaption>proposal</figcaption></figure>
+  </div>
+
+  <h3 class="rv">The route: what the work goes through after a pick</h3>
+  <ol class="route rv">
+    <li><b>The upload check</b><span>postplan/build.py</span><i>a page over 8 MB is refused</i></li>
+    <li><b>The two core rules</b><span>rules/CLAUDE.md</span><i>agents check comes back green</i></li>
+    <li class="you"><b>The review gate</b><span>the PR against main</span><i>you merge it</i></li>
+  </ol>
+  <p class="sub rv">Mandatory in a document of a type that asks him something. One step per line: what it does, what it touches, what closes it, and <code>.you</code> on the one that needs his hands.</p>
+
+  <h3 class="rv">Long tail</h3>
+  <div class="rv">
+    <details><summary>Discarded approaches <span class="count">2</span></summary><div class="body"><p>Anything enumerable that does not change the decision goes folded. What changes the decision, never.</p></div></details>
+    <details><summary>Everything touched <span class="count">14 files</span></summary><div class="body"><p>Exhaustive lists, always here.</p></div></details>
+  </div>
+</div></section>
+
+<section id="questions"><div class="wrap">
+  <div class="sh rv"><span class="n">03</span><h2>Decision questions</h2></div>
+  <p class="sub rv">Every open decision is a numbered question with options. The composer assembles the code Elias pastes in the chat. The recommendation goes first and marked.</p>
+  <div class="q rv" data-q="1" data-multi><div class="qh"><span class="qn">1</span><h4>The question, concrete and with context in the title (data-multi: several get picked)</h4></div><div class="opts">
+    <button class="opt" data-v="A" aria-pressed="false"><b class="l">A</b><span>Recommended option<span class="rec">recommended</span><small>Why, in one line.</small></span></button>
+    <button class="opt" data-v="B" aria-pressed="false"><b class="l">B</b><span>Compatible with A<small>Its cost, in one line.</small></span></button>
+    <button class="opt" data-v="C" aria-pressed="false"><b class="l">C</b><span>Also compatible<small>Its cost, in one line.</small></span></button>
+  </div></div>
+  <p class="sub rv">The note and the X option of every question are added by the script: they do not go in the markup. A single real path: <code>data-single</code> with one <code>.pick</code> presented as taken.</p>
+
+  <h3 class="rv">Decision with components: the option IS the component</h3>
+  <p class="sub rv">Question, problem, solution and options that show what they decide. Every component lives in a <code>.stage</code>: the markup that goes into the repo, at its real size, scaled to the column and never below 11 px of text.</p>
+  <div class="q rv" data-q="9">
+    <div class="qh"><span class="qn">9</span><h4>The question, concrete and with context in the title</h4></div>
+    <div class="qbody">
+      <p><b>Problem.</b> What is wrong today, with its number or its path. One sentence.</p>
+      <p><b>Solution.</b> What each option does differently. One sentence.</p>
+    </div>
+    <div class="picks">
+      <button class="pick" data-v="A" aria-pressed="false">
+        <span class="pk-hd"><b class="l">A</b><span class="pk-t">Solid wheel<span class="rec">recommended</span></span><span class="pk-st">Chosen</span></span>
+        <span class="stage"><span class="st example" style="--sw:320px;width:320px;font-family:'Fraunces',serif;background:#fbf6f4;color:#2a1a1c"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="38" fill="none" stroke="currentColor" stroke-width="9"/><circle cx="50" cy="50" r="9" fill="currentColor"/></svg><span class="cap">100 % of the rim</span></span></span>
+        <small>The cost of this option, in one line.</small>
+      </button>
+      <button class="pick" data-v="B" aria-pressed="false">
+        <span class="pk-hd"><b class="l">B</b><span class="pk-t">Spoked wheel</span><span class="pk-st">Chosen</span></span>
+        <span class="stage"><span class="st example" style="--sw:320px;width:320px;font-family:'Fraunces',serif;background:#fbf6f4;color:#2a1a1c"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="38" fill="none" stroke="currentColor" stroke-width="9"/><path d="M50 12V88M12 50H88M23 23L77 77M77 23L23 77" stroke="currentColor" stroke-width="4"/><circle cx="50" cy="50" r="9" fill="currentColor"/></svg><span class="cap">8 spokes</span></span></span>
+        <small>Its cost, also in one line.</small>
+      </button>
+    </div>
+  </div>
+  <div class="answers rv"><span class="hint">Your answer</span><code id="ans">no answer yet</code><button id="copy" type="button">Copy</button></div>
+</div></section>
+
+<p class="prov wrap"><b>Provenance.</b> Every document closes with this block: which files, commits, log ranges and dates the data came from, and what was estimated, mocked or invented. A document with no provenance is an opinion with styling.</p>
+
+</main>
+
+<script>
+/* Standard script: copy it whole. Reveal + active section + questions. */
+(function(){
+  /* The injected strings follow <html lang>, so a Spanish document does not
+     grow English controls the moment the script runs. */
+  var ES=(document.documentElement.lang||'').toLowerCase().indexOf('es')===0;
+  var T=ES?{own:'Otra respuesta: la escribo abajo',ownSub:'La escribo en la nota de abajo.',chosen:'Elegida',
+      note:'Nota, cambio o pregunta sobre tu eleccion.',noteMulti:'Nota, cambio o pregunta. Aqui puedes elegir varias.',
+      multi:'elige varias',empty:'sin responder',needsNote:'X necesita su nota',copied:'Copiado',swipe:'desliza ->'}
+    :{own:'Another answer: I write it below',ownSub:'I write it in the note below.',chosen:'Chosen',
+      note:'Note, change or question about your pick.',noteMulti:'Note, change or question. Here you can pick several options.',
+      multi:'pick several',empty:'no answer yet',needsNote:'X needs its note',copied:'Copied',swipe:'swipe ->'};
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.rv').forEach(function(el){io.observe(el)});
+  var links=[].slice.call(document.querySelectorAll('#nav a'));
+  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'))});
+  if(links.length){var so=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id)})}})},{rootMargin:'-40% 0px -55% 0px'});secs.forEach(function(s){if(s)so.observe(s)})}
+  /* Questions: exclusive or data-multi; a note and an X option on each one; what
+     is picked persists in the browser per URL so reloading does not erase it. */
+  var key='pp:'+location.pathname,ans={},notes={},ansEl=document.getElementById('ans');
+  try{var st=JSON.parse(localStorage.getItem(key)||'{}');ans=st.a||{};notes=st.n||{}}catch(e){}
+  function save(){try{localStorage.setItem(key,JSON.stringify({a:ans,n:notes}))}catch(e){}}
+  function num(a,b){return (+a)-(+b)}
+  function render(){if(!ansEl)return;var ks=Object.keys(ans).sort(num);var line=ks.map(function(k){return k+ans[k]}).join(' ');
+    var extra=Object.keys(notes).sort(num).filter(function(k){return notes[k]}).map(function(k){return k+': '+notes[k]});
+    var miss=ks.filter(function(k){return ans[k].indexOf('X')>-1&&!notes[k]}).map(function(k){return k+T.needsNote});
+    ansEl.textContent=[line].concat(extra,miss).filter(Boolean).join('\n')||T.empty;save()}
+  document.querySelectorAll('.q').forEach(function(q){
+    var id=q.dataset.q,multi=q.hasAttribute('data-multi');
+    var box=q.querySelector('.picks')||q.querySelector('.opts');
+    if(box&&!q.querySelector('[data-v="X"]')){var own=document.createElement('button');own.type='button';var rich=box.classList.contains('picks');
+      own.className=(rich?'pick':'opt')+' pk-own';own.dataset.v='X';own.setAttribute('aria-pressed','false');
+      own.innerHTML=rich?'<span class="pk-hd"><b class="l">X</b><span class="pk-t">'+T.own+'</span><span class="pk-st">'+T.chosen+'</span></span>':'<b class="l">X</b><span>'+T.own+'<small>'+T.ownSub+'</small></span>';
+      box.appendChild(own)}
+    if(!q.querySelector('.qnote')){var n=document.createElement('textarea');n.className='qnote';n.rows=2;
+      n.placeholder=multi?T.noteMulti:T.note;q.appendChild(n)}
+    var note=q.querySelector('.qnote');note.value=notes[id]||'';note.addEventListener('input',function(){notes[id]=note.value.trim();render()});
+    if(multi&&!q.querySelector('.qmulti')){var qh=q.querySelector('.qh');if(qh){var m=document.createElement('span');m.className='qmulti';m.textContent=T.multi;qh.appendChild(m)}}
+    var os=q.querySelectorAll('[data-v]');
+    function sync(){var sel=[].slice.call(os).filter(function(x){return x.getAttribute('aria-pressed')==='true'}).map(function(x){return x.dataset.v}).sort().join('');if(sel)ans[id]=sel;else delete ans[id];render()}
+    os.forEach(function(o){if(ans[id]&&ans[id].indexOf(o.dataset.v)>-1)o.setAttribute('aria-pressed','true');
+      o.addEventListener('click',function(){if(multi){o.setAttribute('aria-pressed',o.getAttribute('aria-pressed')==='true'?'false':'true')}else{os.forEach(function(x){x.setAttribute('aria-pressed','false')});o.setAttribute('aria-pressed','true')}sync()})});
+  });
+  render();
+  /* The stage: fit the component to its column without rewriting it.
+     Scale down only while the smallest text stays at or above 11 px; below
+     that the stage pans, because shrinking past legibility decides nothing. */
+  /* A wrapped table only scrolls on narrow screens, and the reader has to be
+     told: without the hint the third column is simply lost. */
+  function markTables(){
+    document.querySelectorAll('.tw').forEach(function(w){
+      var over=w.scrollWidth>w.clientWidth+2;
+      w.classList.toggle('scrolls',over);
+      if(over&&!w.querySelector('.twhint')){var h=document.createElement('span');
+        h.className='twhint';h.textContent=T.swipe;w.appendChild(h)}
+    })}
+  markTables();
+  window.addEventListener('resize',markTables);
+
+  var MINPX=11;
+  function smallestFont(el){var m=Infinity,w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT),n;
+    while(n=w.nextNode()){if(!n.nodeValue.trim())continue;var p=n.parentElement;if(!p)continue;
+      var fs=parseFloat(getComputedStyle(p).fontSize);if(fs&&fs<m)m=fs}
+    return m===Infinity?16:m}
+  function fit(stage){var st=stage.firstElementChild;if(!st)return;
+    var nat=parseFloat(getComputedStyle(st).getPropertyValue('--sw'))||st.offsetWidth||1;
+    var avail=stage.clientWidth||stage.getBoundingClientRect().width;
+    var floor=(MINPX+0.2)/smallestFont(st);
+    var k=Math.min(1,Math.max(avail/nat,Math.min(1,floor)));
+    st.style.transform='scale('+k+')';
+    stage.style.height=(st.offsetHeight*k)+'px';
+    stage.classList.toggle('pan',nat*k>avail+1)}
+  var stages=[].slice.call(document.querySelectorAll('.stage'));
+  stages.forEach(function(s){fit(s);
+    if(window.ResizeObserver)new ResizeObserver(function(){fit(s)}).observe(s)});
+  window.addEventListener('load',function(){stages.forEach(fit)});
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){stages.forEach(fit)});
+
+  var cp=document.getElementById('copy');
+  if(cp)cp.addEventListener('click',function(){var b=cp,was=cp.textContent;function done(){b.textContent=T.copied;setTimeout(function(){b.textContent=was},1200)}
+    if(navigator.clipboard){navigator.clipboard.writeText(ansEl.textContent).then(done,done)}else{done()}});
+})();
+</script>
+</body>
+</html>

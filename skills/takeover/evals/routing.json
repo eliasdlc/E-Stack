@@ -1,0 +1,78 @@
+{
+  "about": "Expected routing for takeover. tests/test_external_practices.py checks that this file is well formed; it does not run a model.",
+  "skill": "takeover",
+  "cases": [
+    {
+      "id": "pr-link",
+      "message": "take over https://github.com/eliasdlc/conocerd/pull/186 and get it landed, full send",
+      "situation": "A stale navigation PR from an earlier agent.",
+      "expect": {
+        "loads": true
+      },
+      "check": "Skill tool loads takeover, then development-workflow; the PR body or a new PR names #186"
+    },
+    {
+      "id": "spanish-thread",
+      "message": "retoma lo que dejo el agente de booga que fallo ayer en feat/hm-mobs-land",
+      "situation": "A failed delegated task left a worktree.",
+      "expect": {
+        "loads": true
+      },
+      "check": "takeover loads and reads the thread or task before deciding continue or rebuild"
+    },
+    {
+      "id": "teammate",
+      "message": "Scarlet abrio un PR en salud_dental que arregla el login pero no lo termino, terminalo tu sin borrarle el credito",
+      "situation": "A teammate PR in a group repo.",
+      "expect": {
+        "loads": true
+      },
+      "check": "takeover loads; the plan keeps Co-authored-by for the teammate"
+    },
+    {
+      "id": "casual-typo",
+      "message": "rescata esa rama vieja de pethospital q nunca se mergio",
+      "situation": "An unmerged demo branch.",
+      "expect": {
+        "loads": true
+      },
+      "check": "takeover loads and checks whether the branch is free"
+    },
+    {
+      "id": "chained-stop",
+      "message": "triage and takeover, full stop: a friend sent me these two PRs for the Bitbucket fix",
+      "situation": "Two external PRs fix one bug.",
+      "expect": {
+        "loads": true
+      },
+      "check": "takeover and development-workflow load; the mode ends without merging"
+    },
+    {
+      "id": "own-work",
+      "message": "keep going with the PR you opened an hour ago, fix the failing test",
+      "situation": "The session already owns the PR.",
+      "expect": {
+        "loads": false
+      },
+      "check": "No takeover; the session just continues"
+    },
+    {
+      "id": "pasted-handoff",
+      "message": "(pastes a handoff block) ejecuta esto",
+      "situation": "A handoff pasted as the brief.",
+      "expect": {
+        "loads": false
+      },
+      "check": "development-workflow executes the handoff; takeover does not load"
+    },
+    {
+      "id": "generic-take",
+      "message": "take a look at the analytics page and tell me what you think",
+      "situation": "A review request that shares the word take.",
+      "expect": {
+        "loads": false
+      },
+      "check": "No takeover"
+    }
+  ]
+}
